@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 
 await Problem1();
 await Problem2();
+await Problem2Improved();
 
 static async Task Problem1()
 {
@@ -101,6 +102,71 @@ static async Task Problem2()
             case "9":
             case "nine":
             case "enin":
+                return 9;
+            default:
+                throw new InvalidOperationException(capture);
+        }
+    }
+}
+
+static async Task Problem2Improved()
+{
+    string regexSearch = @"(zero|one|two|three|four|five|six|seven|eight|nine|[0-9])";
+
+    var forward = new Regex(regexSearch, options: RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    var reverse = new Regex(regexSearch, options: RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.RightToLeft);
+
+    var lines = await File.ReadAllLinesAsync("./data1.txt");
+
+    int sum = 0;
+    foreach (var line in lines)
+    {
+        var forwardCapture = forward.Match(line);
+        int forwardValue = TranslateCapture(forwardCapture.Value);
+
+        sum += 10 * forwardValue;
+
+        var backwardCapture = reverse.Match(line);
+        int backwardValue = TranslateCapture(backwardCapture.Value);
+
+        sum += backwardValue;
+    }
+
+    Console.WriteLine(sum);
+
+    static int TranslateCapture(string capture)
+    {
+        switch (capture)
+        {
+            case "0":
+            case "zero":
+                return 0;
+            case "1":
+            case "one":
+                return 1;
+            case "2":
+            case "two":
+                return 2;
+            case "3":
+            case "three":
+                return 3;
+            case "4":
+            case "four":
+                return 4;
+            case "5":
+            case "five":
+                return 5;
+            case "6":
+            case "six":
+                return 6;
+            case "7":
+            case "seven":
+                return 7;
+            case "8":
+            case "eight":
+                return 8;
+            case "9":
+            case "nine":
                 return 9;
             default:
                 throw new InvalidOperationException(capture);
