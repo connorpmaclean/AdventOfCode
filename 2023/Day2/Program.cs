@@ -9,7 +9,7 @@ static async Task Problem1()
     var gameRegex = new Regex("Game ([0-9]+)", RegexOptions.Compiled);
     var colorRegex = new Regex("([0-9]+) ([a-z]+)", RegexOptions.Compiled);
 
-    var lines = await File.ReadAllLinesAsync("./Data1.txt");
+    var lines = await File.ReadAllLinesAsync("./Data1.aoc");
 
     Dictionary<int, bool> results = new();
 
@@ -57,7 +57,7 @@ static async Task Problem2()
 {
     var colorRegex = new Regex("([0-9]+) ([a-z]+)", RegexOptions.Compiled);
 
-    var lines = await File.ReadAllLinesAsync("./Data1.txt");
+    var lines = await File.ReadAllLinesAsync("./Data1.aoc");
 
     int sum = 0;
 

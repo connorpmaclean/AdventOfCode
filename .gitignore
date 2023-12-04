@@ -63,7 +63,7 @@ project.fragment.lock.json
 artifacts/
 
 # ASP.NET Scaffolding
-ScaffoldingReadMe.txt
+ScaffoldingReadMe.aoc
 
 # StyleCop
 StyleCopReport.xml
@@ -215,7 +215,7 @@ rcf/
 AppPackages/
 BundleArtifacts/
 Package.StoreAssociation.xml
-_pkginfo.txt
+_pkginfo.aoc
 *.appx
 *.appxbundle
 *.appxupload
@@ -497,7 +497,7 @@ UpgradeLog*.XML
 UpgradeLog*.htm
 
 # vim
-*.txt~
+*.aoc~
 *.swp
 *.swo
 
@@ -571,3 +571,5 @@ project.lock.json
 *.feature.cs
 *.feature.xlsx.*
 *.Specs_*.html
+
+*.aoc

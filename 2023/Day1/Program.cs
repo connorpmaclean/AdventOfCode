@@ -7,7 +7,7 @@ await Problem2Improved();
 
 static async Task Problem1()
 {
-    var lines = await File.ReadAllLinesAsync("./data1.txt");
+    var lines = await File.ReadAllLinesAsync("./data1.aoc");
 
     int sum = 0;
     foreach (var line in lines)
@@ -39,7 +39,7 @@ static async Task Problem2()
     var forward = new Regex(@"(zero|one|two|three|four|five|six|seven|eight|nine|[0-9])", options: RegexOptions.IgnoreCase | RegexOptions.Compiled);
     var reverse = new Regex(@"(orez|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin|[0-9])", options: RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    var lines = await File.ReadAllLinesAsync("./data1.txt");
+    var lines = await File.ReadAllLinesAsync("./data1.aoc");
 
     int sum = 0;
     foreach (var line in lines)
@@ -116,7 +116,7 @@ static async Task Problem2Improved()
     var forward = new Regex(regexSearch, options: RegexOptions.IgnoreCase | RegexOptions.Compiled);
     var reverse = new Regex(regexSearch, options: RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.RightToLeft);
 
-    var lines = await File.ReadAllLinesAsync("./data1.txt");
+    var lines = await File.ReadAllLinesAsync("./data1.aoc");
 
     int sum = 0;
     foreach (var line in lines)

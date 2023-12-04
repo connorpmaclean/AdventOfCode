@@ -7,7 +7,7 @@ await Problem2();
 
 static async Task Problem1()
 {
-    string[] lines = await File.ReadAllLinesAsync("./Data2.txt");
+    string[] lines = await File.ReadAllLinesAsync("./Data2.aoc");
 
     int xLength = lines[0].Length;
     int yLength = lines.Length;
@@ -92,7 +92,7 @@ static async Task Problem1()
 
 static async Task Problem2()
 {
-    string[] lines = await File.ReadAllLinesAsync("./Data2.txt");
+    string[] lines = await File.ReadAllLinesAsync("./Data2.aoc");
 
     int xLength = lines[0].Length;
     int yLength = lines.Length;
