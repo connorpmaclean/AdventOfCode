@@ -162,12 +162,13 @@ internal class Program
                         && destEntry.SourceEnd >= sourceEntry.DestStart
                         && destEntry.SourceEnd <= sourceEntry.DestEnd)
                     {
-                        long range = destEntry.SourceEnd - sourceEntry.DestStart + 1;
+                        long range = destEntry.SourceEnd - sourceEntry.DestStart;
+                        long offset = sourceEntry.DestStart - destEntry.SourceStart + 1;
                         newMap.list.Add(new MapEntry(
                             sourceEntry.SourceStart,
-                            sourceEntry.SourceStart + range - 1,
-                            destEntry.DestStart,
-                            destEntry.DestStart + range - 1
+                            sourceEntry.SourceStart + range,
+                            destEntry.DestStart + offset,
+                            destEntry.DestStart + offset + range
                             ));
 
                         if (sourceEntry.SourceStart + range - 1 < sourceEntry.SourceEnd)
