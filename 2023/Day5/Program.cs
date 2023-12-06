@@ -12,18 +12,14 @@ internal class Program
     private static async Task Main(string[] args)
     {
         //await Problem1.Problem1Solution();
-        await Problem2.Problem2Attempt2();
-
-        
-
-        
+        await Problem2Solution.Problem2();
     }
 
-    public class Problem2
+    public class Problem2Solution
     {
-        public static async Task Problem2Attempt2()
+        public static async Task Problem2()
         {
-            var lines = await File.ReadAllLinesAsync("./Data1Test.aoc");
+            var lines = await File.ReadAllLinesAsync("./Data2.aoc");
             var seedsNums = lines[0].Split(' ').Skip(1).Select(s => long.Parse(s)).ToArray();
 
             var seedRanges = new List<(long start, long end)>();
@@ -64,8 +60,7 @@ internal class Program
                        seedRange.start,
                        seedRange.end,
                        seedRange.start,
-                       seedRange.end
-                                                                                                                                           ));
+                       seedRange.end));
                 }
             }
 
@@ -92,9 +87,15 @@ internal class Program
             {
                 Console.WriteLine($"{entry.SourceStart},{entry.SourceEnd} -> {entry.DestStart},{entry.DestEnd}");
             }
+
+            Console.WriteLine();
+            Console.WriteLine("Solution: " + consolidatedMap.list.OrderBy(m => m.DestStart).First().DestStart);
         }
 
-        public record MapEntry(long SourceStart, long SourceEnd, long DestStart, long DestEnd);
+        public record MapEntry(long SourceStart, long SourceEnd, long DestStart, long DestEnd)
+        {
+            public override string ToString() => $"{SourceStart},{SourceEnd} -> {DestStart},{DestEnd}";
+        };
 
         public class MapV2
         {
@@ -149,8 +150,8 @@ internal class Program
                         i++;
                     }
 
-                    if (i >= destEntries.Count
-                        || destEntries[i].SourceStart > destEntries[i].DestEnd)
+
+                    if (i == destEntries.Count)
                     {
                         newMap.list.Add(sourceEntry);
                         continue;
@@ -163,20 +164,20 @@ internal class Program
                         && destEntry.SourceEnd <= sourceEntry.DestEnd)
                     {
                         long range = destEntry.SourceEnd - sourceEntry.DestStart;
-                        long offset = sourceEntry.DestStart - destEntry.SourceStart + 1;
+                        long offset = (sourceEntry.DestStart - sourceEntry.SourceStart) + (destEntry.DestStart - destEntry.SourceStart);
                         newMap.list.Add(new MapEntry(
                             sourceEntry.SourceStart,
                             sourceEntry.SourceStart + range,
-                            destEntry.DestStart + offset,
-                            destEntry.DestStart + offset + range
+                            sourceEntry.SourceStart + offset,
+                            sourceEntry.SourceStart + offset + range
                             ));
 
-                        if (sourceEntry.SourceStart + range - 1 < sourceEntry.SourceEnd)
+                        if (sourceEntry.SourceStart + range < sourceEntry.SourceEnd)
                         {
                             var remainingEntry = new MapEntry(
-                                sourceEntry.SourceStart + range,
+                                sourceEntry.SourceStart + range + 1,
                                 sourceEntry.SourceEnd,
-                                sourceEntry.DestStart + range,
+                                sourceEntry.DestStart + range + 1,
                                 sourceEntry.DestEnd
                             );
 
@@ -185,37 +186,41 @@ internal class Program
 
                         continue;
                     }
-                    else if (destEntry.SourceStart >= sourceEntry.DestStart
+                    else if (destEntry.SourceStart >= sourceEntry.DestStart // Inner
                         && destEntry.SourceEnd <= sourceEntry.DestEnd)
                     {
-                        long range = destEntry.SourceEnd - destEntries[i].SourceStart + 1;
-                        long offset = destEntry.SourceStart - sourceEntry.DestStart;
+                        long range = destEntry.SourceEnd - destEntry.SourceStart;
+                        long startOffset = destEntry.SourceStart - sourceEntry.DestStart;
+                        long endOffset = sourceEntry.DestEnd - destEntry.SourceEnd;
+                        long destOffset = (sourceEntry.DestStart - sourceEntry.SourceStart) + (destEntry.DestStart - destEntry.SourceStart);
+
                         newMap.list.Add(new MapEntry(
-                            sourceEntry.SourceStart + offset,
-                            sourceEntry.SourceStart + offset + range - 1,
-                            destEntry.DestStart,
-                            destEntry.DestStart + range - 1
+                            sourceEntry.SourceStart + startOffset,
+                            sourceEntry.SourceStart + startOffset + range,
+                            sourceEntry.SourceStart + startOffset + destOffset,
+                            sourceEntry.SourceStart + startOffset + destOffset + range
                             ));
 
                         // Split before
-                        if (offset > 0)
+                        if (startOffset > 0)
                         {
                             var remainingEntry = new MapEntry(
                                 sourceEntry.SourceStart,
-                                sourceEntry.SourceStart + offset - 1,
+                                sourceEntry.SourceStart + startOffset - 1,
                                 sourceEntry.DestStart,
-                                sourceEntry.DestStart + offset - 1 
+                                sourceEntry.DestStart + startOffset - 1
                             );
 
                             sourceEntries.Enqueue(remainingEntry);
                         }
 
-                        if (sourceEntry.SourceStart + range - 1 < sourceEntry.SourceEnd)
+                        // Split after
+                        if (endOffset > 0)
                         {
                             var remainingEntry = new MapEntry(
-                                sourceEntry.SourceStart + offset + range,
+                                sourceEntry.SourceEnd - endOffset + 1,
                                 sourceEntry.SourceEnd,
-                                sourceEntry.DestStart + offset + range,
+                                sourceEntry.DestEnd - endOffset + 1,
                                 sourceEntry.DestEnd
                             );
 
@@ -230,12 +235,13 @@ internal class Program
                         && destEntry.SourceEnd >= sourceEntry.DestStart)
                     {
                         long range = sourceEntry.DestEnd - destEntry.SourceStart;
-                        long offset = destEntry.SourceEnd - sourceEntry.DestEnd;
+                        long offset = (sourceEntry.DestStart - sourceEntry.SourceStart) + (destEntry.DestStart - destEntry.SourceStart);
+
                         newMap.list.Add(new MapEntry(
                             sourceEntry.SourceEnd - range,
                             sourceEntry.SourceEnd,
-                            destEntry.DestStart,
-                            destEntry.DestEnd - offset
+                            sourceEntry.SourceEnd - range + offset,
+                            sourceEntry.SourceEnd + offset
                             ));
 
                         if (sourceEntry.SourceEnd - range != sourceEntry.SourceStart)
@@ -244,8 +250,8 @@ internal class Program
                                 sourceEntry.SourceStart,
                                 sourceEntry.SourceEnd - range - 1,
                                 sourceEntry.DestStart,
-                                sourceEntry.DestEnd - range - 1
-                                                                                                                                                                                       );
+                                sourceEntry.DestEnd - range - 1);
+
                             sourceEntries.Enqueue(remainingEntry);
                         }
                     }
@@ -270,8 +276,11 @@ internal class Program
                 return newMap;
             }
         }
+    }
 
-        public static async Task Problem2Attempt1()
+    public class Problem2Attempt1
+    {
+        public static async Task Problem2Attempt1Ans()
         {
             var lines = await File.ReadAllLinesAsync("./Data2.aoc");
             var seedsNums = lines[0].Split(' ').Skip(1).Select(s => long.Parse(s)).ToArray();
@@ -329,8 +338,6 @@ internal class Program
             }
         }
     }
-
-
 
     public class Problem1
     {
