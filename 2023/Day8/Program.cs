@@ -4,44 +4,8 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
-        await Problem2();
+        await Problem2Solution();
 
-    }
-
-
-    private static async Task Problem2()
-    {
-        string[] data = await File.ReadAllLinesAsync("./Data1.aoc");
-
-        NodeP1.ParseInput(data.Skip(2));
-
-        string dirs = data[0];
-
-        var currents = NodeP1.AllNodes.Values.Where(n => n.IsA).ToArray();
-
-        Console.WriteLine("start");
-
-        int i = 0;
-        int count = 0;
-        while (!currents.All(n => n.IsZ))
-        {
-            char dir = dirs[i];
-
-            Func<NodeP1, NodeP1> selector = dir == 'L'
-                ? n => n.Left
-                : n => n.Right;
-
-            for (int j = 0; j < currents.Length; j++) 
-            {
-                currents[j] = selector(currents[j]);
-            }
-
-            i++;
-            i %= dirs.Length;
-            count++;
-        }
-
-        Console.WriteLine(count);
     }
 
     private static async Task Problem1()
@@ -65,6 +29,118 @@ internal class Program
             i++;
             i %= dirs.Length;
             count++;
+        }
+
+        Console.WriteLine(count);
+    }
+
+    private static async Task Problem2Solution()
+    {
+        string[] data = await File.ReadAllLinesAsync("./Data1.aoc");
+
+        NodeP1.ParseInput(data.Skip(2));
+
+        string dirs = data[0];
+
+        var currents = NodeP1.AllNodes.Values.Where(n => n.IsA).OrderBy(n => n.Name).ToArray();
+        var zNodes = NodeP1.AllNodes.Where(n => n.Value.IsZ).Select(n => n.Value).ToArray();
+
+        Console.WriteLine("start");
+
+        var loopValues = new List<long>();
+
+        for (int j = 0; j < currents.Length; j++)
+        {
+            int i = 0;
+            long count = 0;
+            var dict = new Dictionary<(string, int), long>();
+            var current = currents[j];
+
+            while (!currents.All(n => n.IsZ))
+            {
+                char dir = dirs[i];
+
+                current = dir == 'L'
+                    ? current.Left
+                    : current.Right;
+
+                count++;
+                if (current.IsZ)
+                {
+                    if (dict.TryGetValue((current.Name, i), out long foundCount))
+                    {
+                        Console.WriteLine($"{j}: Loops at node {current.Name} at counts {foundCount} and {count}. The path hits {dict.Count} Z nodes total.");
+                        loopValues.Add(foundCount);
+                        break;
+                    }
+                    else
+                    {
+                        dict.Add((current.Name, i), count);
+                    }
+                }
+
+                i++;
+                i %= dirs.Length;
+            }
+        }
+
+        long lcm = loopValues.Aggregate(LCM);
+        Console.WriteLine(lcm);
+
+        static long GCF(long a, long b)
+        {
+            while (b != 0)
+            {
+                long temp = b;
+                b = a % b;
+                a = temp;
+            }
+            return a;
+        }
+
+        static long LCM(long a, long b)
+        {
+            return (a / GCF(a, b)) * b;
+        }
+    }
+
+    private static async Task Problem2BruteForce()
+    {
+        string[] data = await File.ReadAllLinesAsync("./Data1.aoc");
+
+        NodeP1.ParseInput(data.Skip(2));
+
+        string dirs = data[0];
+
+        var currents = NodeP1.AllNodes.Values.Where(n => n.IsA).OrderBy(n => n.Name).ToArray();
+        var zNodes = NodeP1.AllNodes.Where(n => n.Value.IsZ).Select(n => n.Value).ToArray();
+
+        Console.WriteLine("start");
+
+        int i = 0;
+        long count = 0;
+        while (!currents.All(n => n.IsZ))
+        {
+            char dir = dirs[i];
+
+            Func<NodeP1, NodeP1> selector = dir == 'L'
+                ? n => n.Left
+                : n => n.Right;
+
+            for (int j = 0; j < currents.Length; j++) 
+            {
+                currents[j] = selector(currents[j]);
+            }
+
+            count++;
+
+            //if (currents.Any(n => n.IsZ))
+            //{
+            //    Console.WriteLine($"{dir} {string.Join(' ', currents.Select(n => n.IsZ ? "Z" : "N"))} {count}");
+            //}
+
+            i++;
+            i %= dirs.Length;
         }
 
         Console.WriteLine(count);
