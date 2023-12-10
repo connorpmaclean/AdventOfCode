@@ -7,14 +7,15 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        await Problem2Attempt12();
+        await Problem2Solution();
     }
 
-    private static async Task Problem2Attempt2()
+    private static async Task Problem2Solution()
     {
-        var lines = await File.ReadAllLinesAsync("./Sample3.aoc");
+        var lines = await File.ReadAllLinesAsync("./Data1.aoc");
 
         char[,] map = new char[lines[0].Length, lines.Length];
+        char[,] largeMap = new char[lines[0].Length * 2, lines.Length * 2];
         Point start = new Point(-1, -1);
         for (int i = 0; i < lines.Length; i++)
         {
@@ -46,20 +47,28 @@ internal class Program
         Point pointA = start;
         Direction dirA = startingDirs[0];
 
-        long count = 0;
-        long sides = 0;
         while (true)
         {
-            count++;
+            largeMap[pointA.X * 2, pointA.Y * 2] = 'X';
+
+            switch (dirA)
+            {
+                case Direction.North:
+                    largeMap[pointA.X * 2, pointA.Y * 2 - 1] = 'X';
+                    break;
+                case Direction.East:
+                    largeMap[pointA.X * 2 + 1, pointA.Y * 2] = 'X';
+                    break;
+                case Direction.West:
+                    largeMap[pointA.X * 2 - 1, pointA.Y * 2] = 'X';
+                    break;
+                case Direction.South:
+                    largeMap[pointA.X * 2, pointA.Y * 2 + 1] = 'X';
+                    break;
+            }
 
             pointA = NextCord(pointA, dirA);
-            var prevDir = dirA;
             dirA = GetNextDir(map, pointA, dirA);
-            if (dirA != prevDir)
-            {
-                sides++;
-            }
-            //Console.WriteLine($"A: {pointA}, {dirA}");
 
             if (dirA == Direction.Impossible)
             {
@@ -67,208 +76,63 @@ internal class Program
             }
         }
 
-        Console.WriteLine(count);
-        Console.WriteLine(sides);
+        var queue = new Queue<Point>();
+        queue.Enqueue(new Point(start.X * 2 - 1, start.Y * 2 + 1)); // Need to customize this per solution
+        var countedPoints = new HashSet<Point>();
+        long areaCount = 0;
 
-        long result = count + (sides / 2) - 1;
-        Console.WriteLine(result);
-    }
-
-    private static async Task Problem2Attempt12()
-    {
-        var lines = await File.ReadAllLinesAsync("./Sample3.aoc");
-
-        char[,] map = new char[lines[0].Length, lines.Length];
-        char[,] xInside = new char[lines[0].Length, lines.Length];
-        char[,] yInside = new char[lines[0].Length, lines.Length];
-        Point start = new Point(-1, -1);
-        for (int i = 0; i < lines.Length; i++)
+        while (queue.TryDequeue(out var point))
         {
-            for (int j = 0; j < lines[0].Length; j++)
+            if (countedPoints.Contains(point))
             {
-                map[j, i] = lines[i][j];
-
-                if (map[j, i] == 'S')
-                {
-                    start.X = j;
-                    start.Y = i;
-                }
+                continue;
             }
+
+            if (point.X < 0 || point.X >= lines[0].Length * 2 || point.Y < 0 || point.Y >= lines.Length * 2)
+            {
+                continue;
+            }
+
+            if (largeMap[point.X, point.Y] == 'X')
+            {
+                continue;
+            }
+
+            areaCount++;
+            countedPoints.Add(point);
+            largeMap[point.X, point.Y] = 'I';
+            queue.Enqueue(new Point(point.X + 1, point.Y));
+            queue.Enqueue(new Point(point.X - 1, point.Y));
+            queue.Enqueue(new Point(point.X, point.Y + 1));
+            queue.Enqueue(new Point(point.X, point.Y - 1));
         }
 
-        // Find start directions.
-        var startingDirs = new List<Direction>()
+        for (int y = 0; y < lines.Length * 2; y++)
         {
-            Direction.North,
-            Direction.East,
-            Direction.South,
-            Direction.West,
-        }
-        .Where(dir => CanGoDirection(start, dir))
-        .Where(dir => GetNextDir(map, NextCord(start, dir), dir) != Direction.Impossible)
-        .ToArray();
-
-        char startPipe = GetStartPipe(startingDirs);
-        map[start.X, start.Y] = startPipe;
-
-        for (int y = 0; y < lines.Length; y++)
-        {
-            List<List<int>> sections = new();
-            sections.Add(new List<int>());
-            bool inHorizontal = false;
-            for (int x = 0; x < lines[0].Length; x++)
+            for (int x = 0; x < lines[0].Length * 2; x++)
             {
-                char c = map[x, y];
-                if (c == '|' || IsJoint(c))
-                {
-                    sections.Add(new List<int>());
-                }
-                else if (c == '.')
-                {
-                    sections.Last().Add(x);
-                }
-                else
-                {
-                    //throw new InvalidOperationException();
-                }
-
-                xInside[x, y] = c;
-            }
-
-            if (sections.Count > 2 && sections.Count % 2 == 1)
-            {
-                for (int i = 1; i < sections.Count; i += 2)
-                {
-                    foreach (int x in sections[i])
-                    {
-                        xInside[x, y] = 'I';
-                    }
-                }
-            }
-            else if (sections.Count > 2)
-            {
-                for (int i = sections.Count / 2; i < sections.Count; i += 2)
-                {
-                    foreach (int x in sections[i])
-                    {
-                        xInside[x, y] = 'I';
-                    }
-                }
-
-                for (int i = sections.Count / 2 - 1; i >= 0; i -= 2)
-                {
-                    foreach (int x in sections[i])
-                    {
-                        xInside[x, y] = 'I';
-                    }
-                }
-            }
-
-
-        }
-
-        Console.WriteLine();
-        int count = 0;
-        for (int x = 0; x < lines[0].Length; x++)
-        {
-            List<List<int>> sections = new();
-            sections.Add(new List<int>());
-            bool inVertical = false;
-            for (int y = 0; y < lines.Length; y++)
-            {
-                char c = map[x, y];
-                if (c == '-' || IsJoint(c))
-                {
-                    sections.Add(new List<int>());
-                }
-                else if (c == '.')
-                {
-                    sections.Last().Add(y);
-                }
-                else
-                {
-                    //throw new InvalidOperationException();
-                }
-
-                yInside[x, y] = c;
-            }
-
-            if (sections.Count > 2 && sections.Count % 2 == 1)
-            {
-                for (int i = 1; i < sections.Count; i += 2)
-                {
-                    foreach (int y in sections[i])
-                    {
-                        yInside[x, y] = 'I';
-                        if (xInside[x, y] == 'I')
-                        {
-                            count++;
-                        }
-                    }
-                }
-            }
-            else if (sections.Count > 2)
-            {
-                for (int i = sections.Count / 2; i < sections.Count; i += 2)
-                {
-                    foreach (int y in sections[i])
-                    {
-                        yInside[x, y] = 'I';
-                        if (xInside[x, y] == 'I')
-                        {
-                            count++;
-                        }
-                    }
-                }
-
-                for (int i = sections.Count / 2 - 1; i >= 0; i -= 2)
-                {
-                    foreach (int y in sections[i])
-                    {
-                        yInside[x, y] = 'I';
-                        if (xInside[x, y] == 'I')
-                        {
-                            count++;
-                        }
-                    }
-                }
-            }
-        }
-
-        Console.WriteLine();
-        for (int y = 0; y < lines.Length; y++)
-        {
-            for (int x = 0; x < lines[0].Length; x++)
-            {
-                char c = xInside[x, y];
+                char c = largeMap[x, y];
+                c = c == default ? '.' : c;
                 Console.Write(c);
             }
 
             Console.WriteLine();
         }
 
-        Console.WriteLine();
-        for (int y = 0; y < lines.Length; y++)
+        long count = 0;
+        for (int y = 0; y < lines.Length * 2; y += 2)
         {
-            for (int x = 0; x < lines[0].Length; x++)
+            for (int x = 0; x < lines[0].Length * 2; x += 2)
             {
-                char c = yInside[x, y];
-                Console.Write(c);
+                if (largeMap[x, y] == 'I')
+                {
+                    count++;
+                }
             }
-
-            Console.WriteLine();
         }
 
         Console.WriteLine(count);
 
-        static bool IsJoint(char c) => c switch
-        {
-            'F' => true,
-            'J' => true,
-            '7' => true,
-            'L' => true,
-            _ => false
-        };
     }
 
     private static async Task Problem2Attempt1()
