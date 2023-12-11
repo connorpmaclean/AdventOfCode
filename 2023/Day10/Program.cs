@@ -8,6 +8,7 @@ internal class Program
     private static async Task Main(string[] args)
     {
         await Problem2Solution();
+        await Problem2Solution2();
     }
 
     private static async Task Problem2Solution()
@@ -125,6 +126,81 @@ internal class Program
             for (int x = 0; x < lines[0].Length * 2; x += 2)
             {
                 if (largeMap[x, y] == 'I')
+                {
+                    count++;
+                }
+            }
+        }
+
+        Console.WriteLine(count);
+
+    }
+
+    private static async Task Problem2Solution2()
+    {
+        var lines = await File.ReadAllLinesAsync("./Data1.aoc");
+
+        char[,] map = new char[lines[0].Length, lines.Length];
+        char[,] xInside = new char[lines[0].Length, lines.Length];
+        char[,] yInside = new char[lines[0].Length, lines.Length];
+        Point start = new Point(-1, -1);
+        for (int i = 0; i < lines.Length; i++)
+        {
+            for (int j = 0; j < lines[0].Length; j++)
+            {
+                map[j, i] = lines[i][j];
+
+                if (map[j, i] == 'S')
+                {
+                    start.X = j;
+                    start.Y = i;
+                }
+            }
+        }
+
+        // Find start directions.
+        var startingDirs = new List<Direction>()
+        {
+            Direction.North,
+            Direction.East,
+            Direction.South,
+            Direction.West,
+        }
+        .Where(dir => CanGoDirection(start, dir))
+        .Where(dir => GetNextDir(map, NextCord(start, dir), dir) != Direction.Impossible)
+        .ToArray();
+
+        Point pointA = start;
+        Direction dirA = startingDirs[0];
+
+        var inLoop = new HashSet<Point>();
+        inLoop.Add(pointA);
+
+        while (true)
+        {
+            pointA = NextCord(pointA, dirA);
+            dirA = GetNextDir(map, pointA, dirA);
+
+            inLoop.Add(pointA);
+
+            if (dirA == Direction.Impossible)
+            {
+                break;
+            }
+        }
+
+        long count = 0;
+        for (int y = 0; y < lines.Length; y++)
+        {
+            bool inner = false;
+            for (int x = 0; x < lines[0].Length; x++)
+            {
+                char c = map[x, y];
+                if (inLoop.Contains(new Point(x, y)) && (c == '|' || c == '7' || c == 'F'))
+                {
+                    inner = !inner;
+                }
+                else if (!inLoop.Contains(new Point(x, y)) && inner)
                 {
                     count++;
                 }

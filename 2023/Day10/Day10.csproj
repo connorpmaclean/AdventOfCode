@@ -14,6 +14,9 @@
     <None Update="Sample.aoc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Sample1.aoc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Sample2.aoc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
