@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
 
 await Problem2();
 
@@ -70,30 +71,23 @@ static async Task Problem1()
             continue;
         }
 
-        try
-        {
-            var allCombs = CombinationsRosettaWoRecursion(unknownIndices, missingSprings);
+        var allCombs = CombinationsRosettaWoRecursion(unknownIndices, missingSprings);
 
-            foreach (var comb in allCombs)
+        foreach (var comb in allCombs)
+        {
+            var mapCopy = new StringBuilder(map);
+            foreach (int index in comb)
             {
-                var mapCopy = new StringBuilder(map);
-                foreach (int index in comb)
-                {
-                    mapCopy[index] = '#';
-                }
-
-                mapCopy.Replace('?', '.');
-                var testGroups = mapCopy.ToString().Split('.').Where(c => c != "").Select(g => g.Length);
-
-                if (Enumerable.SequenceEqual(groups, testGroups))
-                {
-                    count++;
-                }
+                mapCopy[index] = '#';
             }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed row: {line}");
+
+            mapCopy.Replace('?', '.');
+            var testGroups = mapCopy.ToString().Split('.').Where(c => c != "").Select(g => g.Length);
+
+            if (Enumerable.SequenceEqual(groups, testGroups))
+            {
+                count++;
+            }
         }
 
     }
@@ -114,20 +108,20 @@ static async Task Problem2()
 
         string map = new StringBuilder()
             .Append(mapTemp)
-            .Append(mapTemp)
-            .Append(mapTemp)
-            .Append(mapTemp)
-            .Append(mapTemp)
+            //.Append(mapTemp)
+            //.Append(mapTemp)
+            //.Append(mapTemp)
+            //.Append(mapTemp)
             .ToString();
             ;
 
         Console.WriteLine(map);
 
         var groupsTemp = comp[1].Split(",").Select(int.Parse).ToArray();
-        var groups = groupsTemp.Concat(groupsTemp).Concat(groupsTemp).Concat(groupsTemp).Concat(groupsTemp).ToArray();
+        var groups = groupsTemp;
+            //.Concat(groupsTemp).Concat(groupsTemp).Concat(groupsTemp).Concat(groupsTemp).ToArray();
 
         int missingSprings = groups.Sum() - map.Count(c => c == '#');
-        int[] unknownIndices = map.Select((c, i) => (c, i)).Where(x => x.c == '?').Select(x => x.i).ToArray();
 
         if (missingSprings == 0)
         {
@@ -135,29 +129,61 @@ static async Task Problem2()
             continue;
         }
 
-        var allCombs = CombinationsRosettaWoRecursion(unknownIndices, missingSprings);
-
-        long localCount = 0;
-        Parallel.ForEach(allCombs, comb =>
-        {
-            var mapCopy = new StringBuilder(map);
-            foreach (int index in comb)
-            {
-                mapCopy[index] = '#';
-            }
-
-            mapCopy.Replace('?', '.');
-            var testGroups = mapCopy.ToString().Split('.').Where(c => c != "").Select(g => g.Length);
-
-            if (Enumerable.SequenceEqual(groups, testGroups))
-            {
-                Interlocked.Increment(ref localCount);
-            }
-        });
+        long localCount = GetPossibilities(new StringBuilder(map), groups, 0);
 
         count += localCount;
         Console.WriteLine(localCount);
     }
 
     Console.WriteLine("Total: " + count);
+}
+
+static long GetPossibilities(StringBuilder map, Span<int> remaining, int mapStart)
+{
+    
+    int current = remaining[0];
+
+    int minSpacesRemaining = current - 1;
+    for (int i = 1; i < remaining.Length; i++)
+    {
+        minSpacesRemaining += 1 + remaining[i];
+    }
+
+    long possibilities = 0;
+    for (int i = mapStart; i < map.Length - minSpacesRemaining; i++)
+    {
+        StringBuilder mapCopy = new StringBuilder(map.ToString());
+
+        bool valid = true;
+        int j = i;
+        for (; j < i + current; j++)
+        {
+            if (mapCopy[j] == '.')
+            {
+                valid = false;
+                break;
+            }
+            else
+            {
+                mapCopy[j] = '#';
+            }
+        }
+
+        if (valid)
+        {
+            if (remaining.Length == 1)
+            {
+                return 1;
+            }
+            else if (mapCopy[j] == '.' || mapCopy[j] == '?')
+            {
+                mapCopy[j] = '.';
+                possibilities += GetPossibilities(mapCopy, remaining.Slice(1), j + 1);
+            }
+        }
+
+        
+    }
+
+    return possibilities;
 }
