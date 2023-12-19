@@ -36,6 +36,16 @@ namespace AocHelper
             return ParseInternal<T>(input, prefix, out value, suffix);
         }
 
+        public static string Parse<T>(this string input, out T value, string suffix = "") where T : struct
+        {
+            return ParseInternal<T>(input, "", out value, suffix);
+        }
+
+        public static string Parse(this string input, out string value, string suffix = "")
+        {
+            return input.Parse("", out value, suffix);
+        }
+
         public static string Parse(this string input, string prefix, out string value, string suffix = "")
         {
             var result = ParseInternal<string>(input, prefix, out string? foundValue, suffix);
