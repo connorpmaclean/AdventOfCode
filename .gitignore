@@ -573,3 +573,4 @@ project.lock.json
 *.Specs_*.html
 
 *.aoc
+*.data
