@@ -65,6 +65,11 @@ namespace AocHelper
             return result;
         }
 
+        public static string ParseMany(this string input, string delimeter, out string[] values, string suffix = "")
+        {
+            return ParseMany(input, string.Empty, delimeter, out values, suffix);
+        }
+
         public static string ParseMany(this string input, string prefix, string delimeter, out string[] values, string suffix = "")
         {
             values = new string[0];
