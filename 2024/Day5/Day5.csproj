@@ -8,7 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="data1.data">
+    <ProjectReference Include="..\..\Helpers\AocHelper\AocHelper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="data.aoc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Sample.aoc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
