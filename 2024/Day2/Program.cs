@@ -1,38 +1,88 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using AocHelper;
+using System.Runtime.CompilerServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
-Console.WriteLine("Hello, World!");
-
-
-var rows = File.ReadAllLines("./sample.aoc");
-
-int safeCount = 0;
-foreach (var row in rows)
+internal class Program
 {
-    row.ParseMany<int>("", " ", out int[] values);
-
-    IList<int> data = values;
-    if (values[1] > values[0])
+    private static void Main(string[] args)
     {
-        data = data.Reverse().ToList();
+        bool p2 = false;
+        P2();
     }
 
 
-    int safe = 2;
-    foreach (var it in data.GetDoubleIterator<int>())
+    //604 high
+    //592 low
+    private static void P2()
     {
-        int diff = it.Item1 - it.Item2;
-        if (diff >= 4 || diff <= 0)
+        var rows = File.ReadAllLines("./input1.aoc");
+
+        int safeCount = 0;
+        foreach (var row in rows)
         {
-            if (--safe <= 0)
+            row.ParseMany("", " ", out int[] values);
+
+            bool isIncreasing = IsIncreasing(values);
+
+            if (isIncreasing)
             {
-                break;
+                values = values.Reverse().ToArray();
+            }
+
+            bool isSafe = true;
+            bool hasSkip = true;
+            int first = 0; int second = 1;
+            while (second < values.Length)
+            {
+                if (!IsSafe(values[first], values[second]))
+                {
+                    if (!hasSkip)
+                    {
+                        isSafe = false;
+                        break;
+                    }
+
+                    second++;
+                    hasSkip = false;
+                    continue;
+
+                }
+
+                first = ++second - 1;
+            }
+
+            if (isSafe)
+            {
+                safeCount++;
             }
         }
+
+        Console.WriteLine(safeCount);
     }
 
-    safe = Math.Min(safe, 1);
-    safeCount += safe;
-}
+    private static bool IsSafe(int val1, int val2)
+    {
+        int diff = val1 - val2;
+        if (diff <= 0 || diff >= 4)
+        {
+            return false;
+        }
 
-Console.WriteLine(safeCount);
+        return true;
+    }
+
+    private static bool IsIncreasing(int[] values)
+    {
+        int upCount = 0;
+        foreach (var it in values[..4].GetDoubleIterator<int>())
+        {
+            if (it.Item2 > it.Item1)
+            {
+                upCount++;
+            }
+        }
+
+        return upCount >= 2;
+    }
+}
