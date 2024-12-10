@@ -7,17 +7,17 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        P2_1();
+        P2_Working();
     }
 
-    private static void P2_1()
+    private static void P2_Working()
     {
         var rows = File.ReadAllLines("./input1.aoc");
 
         int safeCount = 0;
         foreach (var row in rows)
         {
-            if (SolveP2(row))
+            if (P2Row_Working(row))
             {
                 safeCount++;
             }
@@ -26,16 +26,16 @@ internal class Program
         Console.WriteLine(safeCount);
     }
 
-    private static bool SolveP2(string row)
+    private static bool P2Row_Working(string row)
     {
         row.ParseMany("", " ", out int[] values);
         bool isSafe = true;
-        if (!CheckIsValuesSafe(values))
+        if (!CheckIsValuesSafe_Working(values))
         {
             isSafe = false;
             for (int i = 0; i < values.Length; i++)
             {
-                isSafe |= CheckIsValuesSafe(values, i);
+                isSafe |= CheckIsValuesSafe_Working(values, i);
                 if (isSafe)
                 {
                     break;
@@ -46,7 +46,7 @@ internal class Program
         return isSafe;
     }
 
-    private static bool SolveP2_Old(string row)
+    private static bool SolveP2_Attempt2(string row)
     {
         row.ParseMany("", " ", out int[] values);
         bool isIncreasing = IsIncreasing(values);
@@ -57,12 +57,12 @@ internal class Program
         }
 
         bool isSafe = true;
-        if (!CheckIsValuesSafe(values))
+        if (!CheckIsValuesSafe_Working(values))
         {
             isSafe = false;
             for (int i = 0; i < values.Length; i++)
             {
-                isSafe |= CheckIsValuesSafe(values, i);
+                isSafe |= CheckIsValuesSafe_Working(values, i);
                 if (isSafe)
                 {
                     break;
@@ -73,7 +73,7 @@ internal class Program
         return isSafe;
     }
 
-    private static bool CheckIsValuesSafe(int[] values, int skip = -1)
+    private static bool CheckIsValuesSafe_Working(int[] values, int skip = -1)
     {
         int first = 0; int second = 1;
         bool? isAsc = null;
@@ -101,7 +101,7 @@ internal class Program
                 isAsc = values[second] > values[first];
             }
 
-            if (!IsSafeP2(values[first], values[second], isAsc.Value))
+            if (!IsSafeP2_Working(values[first], values[second], isAsc.Value))
             {
                 return false;
             }
@@ -113,7 +113,7 @@ internal class Program
         return true;
     }
 
-    private static bool IsSafeP2(int val1, int val2, bool isAsc)
+    private static bool IsSafeP2_Working(int val1, int val2, bool isAsc)
     {
         int diff;
         if (isAsc)
@@ -178,7 +178,7 @@ internal class Program
     // 593 bad
     // 594 bad
     // 595 bad
-    private static void P2()
+    private static void P2_Attempt1()
     {
         var rows = File.ReadAllLines("./input1.aoc");
 
