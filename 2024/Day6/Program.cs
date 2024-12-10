@@ -5,10 +5,81 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        P2();
+        P2_2();
     }
 
     //619 too low
+    // 1755 too high
+    // 1716 too high
+    private static void P2_2()
+    {
+        var lines = File.ReadAllLines("./data.aoc");
+        var map = lines.GetMap<char>(out int xLength, out int yLength);
+        int x, y;
+        GetOrigin(map, xLength, yLength, out x, out y);
+
+        Direction dir = Direction.North;
+        var marked = new HashSet<PathPoint>();
+        var obs = new HashSet<Point>();
+        while (true)
+        {
+            marked.Add(new PathPoint(x, y, dir));
+
+            //if (x == 2 && y == 8)
+            //{
+            //    Console.WriteLine();
+            //}
+
+            (int nextX, int nextY) = GetNext(x, y, dir);
+            if (nextX >= xLength || nextX < 0 || nextY >= yLength || nextY < 0)
+            {
+                break;
+            }
+
+            if (map[nextX, nextY] == '#')
+            {
+                dir = Rotate(dir);
+                continue;
+            }
+            else
+            {
+                var markedCopy = new HashSet<PathPoint>(marked);
+                if (DetectLoop_2(map, xLength, yLength, Rotate(dir), x, y, markedCopy, nextX, nextY))
+                {
+                    obs.Add(new Point(nextX, nextY));
+                }
+            }
+
+            x = nextX; y = nextY;
+        }
+
+
+        foreach (var obs1 in obs)
+        {
+            Console.WriteLine(obs1);
+        }
+
+        Console.WriteLine(obs.Count);
+    }
+
+    private static void GetOrigin(char[,] map, int xLength, int yLength, out int x, out int y)
+    {
+        x = -1;
+        y = -1;
+        for (int i = 0; i < xLength; i++)
+        {
+            for (int j = 0; j < yLength; j++)
+            {
+                if (map[i, j] == '^')
+                {
+                    x = i;
+                    y = j;
+                    break;
+                }
+            }
+        }
+    }
+
     private static void P2()
     {
         var lines = File.ReadAllLines("./sample.aoc");
@@ -35,10 +106,10 @@ internal class Program
         {
             marked.Add(new PathPoint(x, y, dir));
 
-            if (x == 2 && y == 8)
-            {
-                Console.WriteLine();
-            }
+            //if (x == 2 && y == 8)
+            //{
+            //    Console.WriteLine();
+            //}
 
             (int nextX, int nextY) = GetNext(x, y, dir);
             if (nextX >= xLength || nextX < 0 || nextY >= yLength || nextY < 0)
@@ -66,7 +137,7 @@ internal class Program
 
                 var markedCopy = new HashSet<PathPoint>(marked);
                 if (marked.Contains(new PathPoint(x, y, hypDir))
-                    || DetectLoop(map, xLength, yLength, hypDir, hypX, hypY, markedCopy))
+                    || DetectLoop(map, xLength, yLength, hypDir, hypX, hypY, markedCopy, nextX, nextY))
                 {
                     obs.Add(new Point(nextX, nextY));
                 }
@@ -84,7 +155,7 @@ internal class Program
         Console.WriteLine(obs.Count);
     }
 
-    private static bool DetectLoop(char[,] map, int xLength, int yLength, Direction dir, int x, int y, HashSet<PathPoint> marked)
+    private static bool DetectLoop_2(char[,] map, int xLength, int yLength, Direction dir, int x, int y, HashSet<PathPoint> marked, int obsX, int obsY)
     {
         while (true)
         {
@@ -100,6 +171,40 @@ internal class Program
             if (nextX >= xLength || nextX < 0 || nextY >= yLength || nextY < 0)
             {
                 return false;
+            }
+
+            if (map[nextX, nextY] == '#' || (obsX == nextX && obsY == nextY))
+            {
+                dir = Rotate(dir);
+                continue;
+            }
+
+            x = nextX; y = nextY;
+        }
+    }
+
+    private static bool DetectLoop(char[,] map, int xLength, int yLength, Direction dir, int x, int y, HashSet<PathPoint> marked, int obsX, int obsY)
+    {
+        while (true)
+        {
+            var p = new PathPoint(x, y, dir);
+            if (marked.Contains(p))
+            {
+                return true;
+            }
+
+            marked.Add(p);
+
+            (int nextX, int nextY) = GetNext(x, y, dir);
+            if (nextX >= xLength || nextX < 0 || nextY >= yLength || nextY < 0)
+            {
+                return false;
+            }
+
+            while (map[nextX, nextY] == '#' || (obsX == nextX && obsY == nextY))
+            {
+                dir = Rotate(dir);
+                (nextX, nextY) = GetNext(x, y, dir);
             }
 
             x = nextX; y = nextY;
