@@ -7,13 +7,177 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        bool p2 = false;
-        P2();
+        P2_1();
+    }
+
+    private static void P2_1()
+    {
+        var rows = File.ReadAllLines("./input1.aoc");
+
+        int safeCount = 0;
+        foreach (var row in rows)
+        {
+            if (SolveP2(row))
+            {
+                safeCount++;
+            }
+        }
+
+        Console.WriteLine(safeCount);
+    }
+
+    private static bool SolveP2(string row)
+    {
+        row.ParseMany("", " ", out int[] values);
+        bool isSafe = true;
+        if (!CheckIsValuesSafe(values))
+        {
+            isSafe = false;
+            for (int i = 0; i < values.Length; i++)
+            {
+                isSafe |= CheckIsValuesSafe(values, i);
+                if (isSafe)
+                {
+                    break;
+                }
+            }
+        }
+
+        return isSafe;
+    }
+
+    private static bool SolveP2_Old(string row)
+    {
+        row.ParseMany("", " ", out int[] values);
+        bool isIncreasing = IsIncreasing(values);
+
+        if (isIncreasing)
+        {
+            values = values.Reverse().ToArray();
+        }
+
+        bool isSafe = true;
+        if (!CheckIsValuesSafe(values))
+        {
+            isSafe = false;
+            for (int i = 0; i < values.Length; i++)
+            {
+                isSafe |= CheckIsValuesSafe(values, i);
+                if (isSafe)
+                {
+                    break;
+                }
+            }
+        }
+
+        return isSafe;
+    }
+
+    private static bool CheckIsValuesSafe(int[] values, int skip = -1)
+    {
+        int first = 0; int second = 1;
+        bool? isAsc = null;
+        while (second < values.Length)
+        {
+            if (skip == second)
+            {
+                second++;
+                continue;
+            }
+
+            if (first == skip)
+            {
+                first++;
+                if (first == second)
+                {
+                    second++;
+                }
+
+                continue;
+            }
+
+            if (isAsc == null)
+            {
+                isAsc = values[second] > values[first];
+            }
+
+            if (!IsSafeP2(values[first], values[second], isAsc.Value))
+            {
+                return false;
+            }
+
+            second++;
+            first++;
+        }
+
+        return true;
+    }
+
+    private static bool IsSafeP2(int val1, int val2, bool isAsc)
+    {
+        int diff;
+        if (isAsc)
+        {
+            diff = val2 - val1;
+            
+        }
+        else
+        {
+            diff = val1 - val2;
+        }
+
+        if (diff >= 4 || diff <= 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static void P1()
+    {
+        var rows = File.ReadAllLines("./input1.aoc");
+
+        int safeCount = 0;
+        foreach (var row in rows)
+        {
+            row.ParseMany("", " ", out int[] values);
+
+            bool isIncreasing = IsIncreasing(values);
+
+            if (isIncreasing)
+            {
+                values = values.Reverse().ToArray();
+            }
+
+            bool isSafe = true;
+            int first = 0; int second = 1;
+            while (second < values.Length)
+            {
+                if (!IsSafe(values[first], values[second]))
+                {
+                    isSafe = false;
+                    break;
+                }
+
+                first = ++second - 1;
+            }
+
+            if (isSafe)
+            {
+                safeCount++;
+            }
+        }
+
+        Console.WriteLine(safeCount);
     }
 
 
     //604 high
     //592 low
+    // 593 bad
+    // 594 bad
+    // 595 bad
     private static void P2()
     {
         var rows = File.ReadAllLines("./input1.aoc");
