@@ -11,4 +11,13 @@
     <ProjectReference Include="..\..\Helpers\AocHelper\AocHelper.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="data.aoc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="sample.aoc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
